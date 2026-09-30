@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact | {{GROUP_NAME}}</title>
+<meta name="description" content="Contact the group.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="placeholder-notice" role="note">Placeholder name: the group&rsquo;s name has not been chosen.</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="wordmark" href="index.html" data-group-name>Saetbyeol Group</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="thesis.html">Thesis</a>
+      <a href="companies.html">Companies</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker">Contact</p>
+      <h1>Write to us.</h1>
+      <p class="lede">Business owners thinking about selling, operators who want to run something well, or anyone with a question about the group.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <form class="contact" id="contact-form" novalidate>
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="f-msg">Message</label>
+          <textarea id="f-msg" name="message" required></textarea>
+        </div>
+        <button class="btn" type="submit">Send</button>
+        <p class="form-note" id="form-note"></p>
+      </form>
+      <p class="form-note">We do not take outside investment and are not accepting it.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>&copy; <span data-year>2026</span> <span data-group-name>Saetbyeol Group</span>. All rights reserved.</p>
+    <nav aria-label="Footer">
+      <a href="thesis.html">Thesis</a>
+      <a href="companies.html">Companies</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="site.js"></script>
+<script>
+(function () {
+  var form = document.getElementById("contact-form");
+  var note = document.getElementById("form-note");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("f-name").value.trim();
+    var email = document.getElementById("f-email").value.trim();
+    var msg = document.getElementById("f-msg").value.trim();
+    if (!name || !email || !msg) {
+      note.textContent = "Please fill in your name, email, and message.";
+      return;
+    }
+    /* API path: enabled once the "umbrella" site_id is added to the
+       platform API SITES_CONFIG. Until then, mailto fallback. */
+    if (typeof CONTACT_API !== "undefined" && CONTACT_API) {
+      fetch(CONTACT_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ site_id: CONTACT_SITE_ID, name: name, email: email, message: msg })
+      }).then(function (r) {
+        note.textContent = r.ok
+          ? "Thank you. Your message has been sent."
+          : "Something went wrong. Please email us directly instead.";
+      }).catch(function () {
+        note.textContent = "Something went wrong. Please email us directly instead.";
+      });
+      return;
+    }
+    var to = (typeof CONTACT_EMAIL !== "undefined") ? CONTACT_EMAIL : "";
+    var subject = encodeURIComponent("Website contact from " + name);
+    var body = encodeURIComponent(msg + "\n\n, " + name + " (" + email + ")");
+    location.href = "mailto:" + to + "?subject=" + subject + "&body=" + body;
+    note.textContent = "Opening your email app to send the message.";
+  });
+})();
+</script>
+</body>
+</html>
